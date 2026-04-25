@@ -43,5 +43,3 @@ try:
                     st.info(f"النتيجة: {result}")
             else:
                 st.error("من فضلك أدخل نصاً أولاً")
-except Exception as e:
-    st.error(f"حدث خطأ غير متوقع: {e}")
