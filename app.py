@@ -118,5 +118,3 @@ elif st.session_state.page == 'awareness':
                 response = requests.get(f'https://drive.google.com/uc?id={img_id}')
                 st.image(Image.open(BytesIO(response.content)), use_container_width=True)
             except: st.info(f"إرشاد {i+1}")
-
-st.markdown("<br><p style='text-align: center; color: #1E40AF; font-weight: bold;'>صُنع بواسطة ميوي | مشروع التخرج 2026</p>", unsafe_allow_html=True)
