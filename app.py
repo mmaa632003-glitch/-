@@ -21,12 +21,12 @@ def local_css():
             background-size: cover;
             background-attachment: fixed;
         }}
-        h1 {{ color: #1E40AF !important; text-align: center; font-family: 'Cairo', sans-serif; }}
+        h1 {{ color: #1E40AF !important; text-align: center; font-family: 'Cairo', sans-serif; margin-bottom: 5px; }}
+        .description {{ color: #1E3A8A; text-align: center; font-size: 1.2rem; font-weight: bold; margin-bottom: 30px; }}
         .stButton>button {{
             background: linear-gradient(90deg, #1E40AF 0%, #3B82F6 100%);
             color: white; border-radius: 20px; font-weight: bold; width: 100%; height: 60px; font-size: 20px;
         }}
-        .main-btn {{ margin-bottom: 20px; }}
         </style>
         """,
         unsafe_allow_html=True
@@ -52,9 +52,12 @@ if 'page' not in st.session_state:
 def change_page(page_name):
     st.session_state.page = page_name
 
+# العناوين والوصف (ثابتة في كل الصفحات)
+st.markdown("<h1>🛡️ مَنصة بَصيرة الذكية</h1>", unsafe_allow_html=True)
+st.markdown("<p class='description'>لتحليل بيانات التنمر المدرسي ودعم الوعي الرقمي</p>", unsafe_allow_html=True)
+
 # --- الشاشة الرئيسية ---
 if st.session_state.page == 'home':
-    st.markdown("<h1>🛡️ مَنصة بَصيرة الذكية</h1>", unsafe_allow_html=True)
     st.write("---")
     col1, col2 = st.columns(2)
     
@@ -71,7 +74,7 @@ elif st.session_state.page == 'analysis':
     if st.button("⬅️ العودة للرئيسية"):
         change_page('home')
         
-    st.markdown("<h1>📋 نموذج تحليل الحالة</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>📋 نموذج تحليل الحالة</h2>", unsafe_allow_html=True)
     try:
         model = load_model()
         col1, col2 = st.columns(2)
@@ -105,7 +108,7 @@ elif st.session_state.page == 'awareness':
     if st.button("⬅️ العودة للرئيسية"):
         change_page('home')
         
-    st.markdown("<h1>💡 ركن الوعي والإرشاد</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>💡 ركن الوعي والإرشاد</h2>", unsafe_allow_html=True)
     image_ids = ["1M9iTdFQgKKzd4Jp1y9j3HE5NK0sWSv_v", "1GHTzjnMo_9hb4Jrr5rxyqOtyuxOsq3mO", "1bveQNCSBV399mIZHZHcD8XcDzRqk8MdD", "194UUr6XatRELceStckSXM8S1B7Spe9ZD", "1ic226ifc_9y93VXUSueVPdG6EK8NSAqK", "1H4_gNm_SYW_-Q04p2n3ap0Ac_Kr-mNE_"]
     
     cols = st.columns(3)
@@ -117,4 +120,3 @@ elif st.session_state.page == 'awareness':
             except: st.info(f"إرشاد {i+1}")
 
 st.markdown("<br><p style='text-align: center; color: #1E40AF; font-weight: bold;'>صُنع بواسطة ميوي | مشروع التخرج 2026</p>", unsafe_allow_html=True)
-
