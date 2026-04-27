@@ -3,6 +3,9 @@ import pandas as pd
 import pickle
 import gdown
 import os
+import requests
+from PIL import Image
+from io import BytesIO
 
 # --- 1. إعدادات الواجهة والألوان (CSS) ---
 def local_css():
@@ -22,6 +25,7 @@ def local_css():
         h2 {
             color: #1E3A8A !important;
             text-align: center;
+            margin-top: 40px;
         }
         /* تنسيق الأزرار */
         .stButton>button {
@@ -32,17 +36,12 @@ def local_css():
             height: 50px;
             font-size: 18px;
             font-weight: bold;
+            border: none;
         }
         .stButton>button:hover {
             background-color: #2563EB;
             color: white;
-        }
-        /* صندوق النتائج */
-        .result-box {
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: bold;
+            border: none;
         }
         </style>
         """,
@@ -51,10 +50,9 @@ def local_css():
 
 local_css()
 
-# --- 2. دالة تحميل الموديل والمنشورات التوعوية ---
+# --- 2. دالة تحميل الموديل الذكي ---
 @st.cache_resource
 def load_model():
-    # الـ ID بتاع الموديل اللي رفعناه قبل كدة
     file_id = '1jLjUy1EEdrpmVcF5g564vTojYaVVGZZR'
     url = f'https://drive.google.com/uc?id={file_id}'
     output = 'baseera_model.pkl'
@@ -71,7 +69,6 @@ st.write("---")
 try:
     model = load_model()
     
-    # قسم إدخال البيانات
     st.subheader("📋 نموذج تحليل حالة الطالب")
     
     col1, col2 = st.columns(2)
@@ -96,7 +93,6 @@ try:
     st.write("---")
     
     if st.button("إجراء التحليل الإحصائي الآن"):
-        # تحويل النصوص لأرقام للموديل
         mapping = {"نعم": 1, "لا": 0, "ذكر": 1, "أنثى": 0}
         
         inputs = [
@@ -115,13 +111,12 @@ try:
             st.success("✅ مؤشر آمن: لا توجد مؤشرات قلق واضحة بشأن تعرض الطالب للتنمر حالياً.")
 
 except Exception as e:
-    st.error(f"عذراً، حدث خطأ فني: {e}")
+    st.error(f"عذراً، حدث خطأ فني في الموديل: {e}")
 
-# --- 4. معرض بصيرة التوعوي (الصور الـ 6) ---
+# --- 4. معرض بصيرة التوعوي (معالجة الصور الجديدة) ---
 st.write("---")
 st.markdown("<h2>💡 معرض بَصيرة التوعوي</h2>", unsafe_allow_html=True)
 
-# قائمة الـ IDs اللي بعتيها للصور
 image_ids = [
     "1M9iTdFQgKKzd4Jp1y9j3HE5NK0sWSv_v",
     "1GHTzjnMo_9hb4Jrr5rxyqOtyuxOsq3mO",
@@ -131,11 +126,17 @@ image_ids = [
     "1H4_gNm_SYW_-Q04p2n3ap0Ac_Kr-mNE_"
 ]
 
-# عرض الصور في صفوف (3 صور في كل صف)
 cols = st.columns(3)
+
 for i, img_id in enumerate(image_ids):
     with cols[i % 3]:
         img_url = f'https://drive.google.com/uc?id={img_id}'
-        st.image(img_url, use_container_width=True)
+        try:
+            # جلب الصورة من الرابط وتحويلها لبيانات قابلة للعرض
+            response = requests.get(img_url)
+            img = Image.open(BytesIO(response.content))
+            st.image(img, use_container_width=True, caption=f"إرشاد توعوي {i+1}")
+        except:
+            st.warning(f"تعذر تحميل الصورة {i+1}. تأكدي من صلاحية الرابط.")
 
 st.markdown("<p style='text-align: center; color: #94A3B8; margin-top: 50px;'>تم التطوير بواسطة: ميوي | مشروع التخرج 2026</p>", unsafe_allow_html=True)
