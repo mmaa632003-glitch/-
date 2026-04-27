@@ -7,42 +7,26 @@ import requests
 from PIL import Image
 from io import BytesIO
 
-# --- 1. إعدادات الواجهة والألوان (CSS) ---
+# --- 1. إعدادات الواجهة والـ CSS ---
 def local_css():
+    bg_img_id = '1wnNEEi1zq_TvCAvExB3_BmsCZabfoq6e'
+    bg_img_url = f'https://drive.google.com/uc?id={bg_img_id}'
+    
     st.markdown(
-        """
+        f"""
         <style>
-        /* الخلفية العامة */
-        .stApp {
-            background-color: #F8FAFC;
-        }
-        /* تنسيق العناوين */
-        h1 {
-            color: #1E3A8A !important;
-            font-family: 'Cairo', sans-serif;
-            text-align: center;
-        }
-        h2 {
-            color: #1E3A8A !important;
-            text-align: center;
-            margin-top: 40px;
-        }
-        /* تنسيق الأزرار */
-        .stButton>button {
-            background-color: #1E3A8A;
-            color: white;
-            border-radius: 12px;
-            width: 100%;
-            height: 50px;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-        }
-        .stButton>button:hover {
-            background-color: #2563EB;
-            color: white;
-            border: none;
-        }
+        .stApp {{
+            background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), 
+                        url("{bg_img_url}");
+            background-size: cover;
+            background-attachment: fixed;
+        }}
+        h1 {{ color: #1E40AF !important; text-align: center; font-family: 'Cairo', sans-serif; }}
+        .stButton>button {{
+            background: linear-gradient(90deg, #1E40AF 0%, #3B82F6 100%);
+            color: white; border-radius: 20px; font-weight: bold; width: 100%; height: 60px; font-size: 20px;
+        }}
+        .main-btn {{ margin-bottom: 20px; }}
         </style>
         """,
         unsafe_allow_html=True
@@ -50,7 +34,7 @@ def local_css():
 
 local_css()
 
-# --- 2. دالة تحميل الموديل الذكي ---
+# --- 2. تحميل الموديل ---
 @st.cache_resource
 def load_model():
     file_id = '1jLjUy1EEdrpmVcF5g564vTojYaVVGZZR'
@@ -61,82 +45,76 @@ def load_model():
     with open(output, 'rb') as f:
         return pickle.load(f)
 
-# --- 3. واجهة البرنامج الرئيسية ---
-st.markdown("<h1>🛡️ منصة بَصيرة الذكية</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #64748B;'>مشروع التخرج: الكشف عن التنمر المدرسي باستخدام تعلم الآلة</p>", unsafe_allow_html=True)
-st.write("---")
+# --- 3. التحكم في التنقل (Navigation) ---
+if 'page' not in st.session_state:
+    st.session_state.page = 'home'
 
-try:
-    model = load_model()
-    
-    st.subheader("📋 نموذج تحليل حالة الطالب")
-    
+def change_page(page_name):
+    st.session_state.page = page_name
+
+# --- الشاشة الرئيسية ---
+if st.session_state.page == 'home':
+    st.markdown("<h1>🛡️ مَنصة بَصيرة الذكية</h1>", unsafe_allow_html=True)
+    st.write("---")
     col1, col2 = st.columns(2)
     
     with col1:
-        age = st.number_input("عمر الطالب", 10, 25, 15)
-        sex = st.selectbox("الجنس", ["أنثى", "ذكر"])
-        cyber = st.selectbox("هل تعرض الطالب لتنمر إلكتروني سابقاً؟", ["لا", "نعم"])
-        lonely = st.selectbox("هل يشعر الطالب بالوحدة معظم الوقت؟", ["لا", "نعم"])
-        attacked = st.selectbox("هل تعرض الطالب لهجوم جسدي؟", ["لا", "نعم"])
-        outside = st.selectbox("هل حدث تنمر خارج أسوار المدرسة؟", ["لا", "نعم"])
-
+        if st.button("🔍 بدء تحليل بيانات الحالة"):
+            change_page('analysis')
+            
     with col2:
-        friends = st.number_input("عدد الأصدقاء المقربين", 0, 10, 3)
-        parents = st.selectbox("هل الأهل يتفهمون مشاكل الطالب؟", ["نعم", "لا"])
-        kind = st.selectbox("هل الزملاء في المدرسة متعاونون؟", ["نعم", "لا"])
-        miss = st.selectbox("هل تغيب الطالب عن المدرسة بدون إذن؟", ["لا", "نعم"])
-        underweight = st.checkbox("هل يعاني الطالب من نقص وزن؟")
-        overweight = st.checkbox("هل يعاني الطالب من وزن زائد؟")
-        obese = st.checkbox("هل يعاني الطالب من سمنة مفرطة؟")
+        if st.button("💡 ركن الوعي والإرشاد"):
+            change_page('awareness')
 
-    st.write("---")
+# --- صفحة التحليل ---
+elif st.session_state.page == 'analysis':
+    if st.button("⬅️ العودة للرئيسية"):
+        change_page('home')
+        
+    st.markdown("<h1>📋 نموذج تحليل الحالة</h1>", unsafe_allow_html=True)
+    try:
+        model = load_model()
+        col1, col2 = st.columns(2)
+        with col1:
+            age = st.number_input("عمر الطالب", 10, 25, 15)
+            sex = st.selectbox("الجنس", ["أنثى", "ذكر"])
+            cyber = st.selectbox("تعرض لتنمر إلكتروني؟", ["لا", "نعم"])
+            lonely = st.selectbox("يشعر بالوحدة؟", ["لا", "نعم"])
+            attacked = st.selectbox("تعرض لهجوم جسدي؟", ["لا", "نعم"])
+            outside = st.selectbox("تنمر خارج المدرسة؟", ["لا", "نعم"])
+        with col2:
+            friends = st.number_input("عدد الأصدقاء", 0, 10, 3)
+            parents = st.selectbox("الأهل يتفهمون المشاكل؟", ["نعم", "لا"])
+            kind = st.selectbox("الزملاء متعاونون؟", ["نعم", "لا"])
+            miss = st.selectbox("غياب بدون إذن؟", ["لا", "نعم"])
+            underweight = st.checkbox("نقص وزن")
+            overweight = st.checkbox("وزن زائد")
+            obese = st.checkbox("سمنة مفرطة")
+
+        if st.button("🚀 إجراء التحليل الآن"):
+            mapping = {"نعم": 1, "لا": 0, "ذكر": 1, "أنثى": 0}
+            inputs = [mapping[outside], mapping[cyber], age, mapping[sex], mapping[attacked], mapping[lonely], friends, mapping[miss], mapping[kind], mapping[parents], 1 if underweight else 0, 1 if overweight else 0, 1 if obese else 0]
+            prediction = model.predict([inputs])
+            if prediction[0] == 1: st.error("⚠️ مؤشر مرتفع لوجود تنمر.")
+            else: st.success("✅ حالة آمنة ومستقرة.")
+    except Exception as e:
+        st.error(f"خطأ: {e}")
+
+# --- صفحة الوعي والإرشاد ---
+elif st.session_state.page == 'awareness':
+    if st.button("⬅️ العودة للرئيسية"):
+        change_page('home')
+        
+    st.markdown("<h1>💡 ركن الوعي والإرشاد</h1>", unsafe_allow_html=True)
+    image_ids = ["1M9iTdFQgKKzd4Jp1y9j3HE5NK0sWSv_v", "1GHTzjnMo_9hb4Jrr5rxyqOtyuxOsq3mO", "1bveQNCSBV399mIZHZHcD8XcDzRqk8MdD", "194UUr6XatRELceStckSXM8S1B7Spe9ZD", "1ic226ifc_9y93VXUSueVPdG6EK8NSAqK", "1H4_gNm_SYW_-Q04p2n3ap0Ac_Kr-mNE_"]
     
-    if st.button("إجراء التحليل الإحصائي الآن"):
-        mapping = {"نعم": 1, "لا": 0, "ذكر": 1, "أنثى": 0}
-        
-        inputs = [
-            mapping[outside], mapping[cyber], age, mapping[sex],
-            mapping[attacked], mapping[lonely], friends,
-            mapping[miss], mapping[kind], mapping[parents],
-            1 if underweight else 0, 1 if overweight else 0, 1 if obese else 0
-        ]
-        
-        prediction = model.predict([inputs])
-        
-        st.markdown("### 📊 نتيجة التحليل:")
-        if prediction[0] == 1:
-            st.error("⚠️ مؤشر مرتفع: هناك احتمالية لتعرض الطالب للتنمر. يوصى بالتدخل التربوي.")
-        else:
-            st.success("✅ مؤشر آمن: لا توجد مؤشرات قلق واضحة بشأن تعرض الطالب للتنمر حالياً.")
+    cols = st.columns(3)
+    for i, img_id in enumerate(image_ids):
+        with cols[i % 3]:
+            try:
+                response = requests.get(f'https://drive.google.com/uc?id={img_id}')
+                st.image(Image.open(BytesIO(response.content)), use_container_width=True)
+            except: st.info(f"إرشاد {i+1}")
 
-except Exception as e:
-    st.error(f"عذراً، حدث خطأ فني في الموديل: {e}")
+st.markdown("<br><p style='text-align: center; color: #1E40AF; font-weight: bold;'>صُنع بواسطة ميوي | مشروع التخرج 2026</p>", unsafe_allow_html=True)
 
-# --- 4. معرض بصيرة التوعوي (معالجة الصور الجديدة) ---
-st.write("---")
-st.markdown("<h2>💡 معرض بَصيرة التوعوي</h2>", unsafe_allow_html=True)
-
-image_ids = [
-    "1M9iTdFQgKKzd4Jp1y9j3HE5NK0sWSv_v",
-    "1GHTzjnMo_9hb4Jrr5rxyqOtyuxOsq3mO",
-    "1bveQNCSBV399mIZHZHcD8XcDzRqk8MdD",
-    "194UUr6XatRELceStckSXM8S1B7Spe9ZD",
-    "1ic226ifc_9y93VXUSueVPdG6EK8NSAqK",
-    "1H4_gNm_SYW_-Q04p2n3ap0Ac_Kr-mNE_"
-]
-
-cols = st.columns(3)
-
-for i, img_id in enumerate(image_ids):
-    with cols[i % 3]:
-        img_url = f'https://drive.google.com/uc?id={img_id}'
-        try:
-            # جلب الصورة من الرابط وتحويلها لبيانات قابلة للعرض
-            response = requests.get(img_url)
-            img = Image.open(BytesIO(response.content))
-            st.image(img, use_container_width=True, caption=f"إرشاد توعوي {i+1}")
-        except:
-            st.warning(f"تعذر تحميل الصورة {i+1}. تأكدي من صلاحية الرابط.")
-
-st.markdown("<p style='text-align: center; color: #94A3B8; margin-top: 50px;'>تم التطوير بواسطة: ميوي | مشروع التخرج 2026</p>", unsafe_allow_html=True)
